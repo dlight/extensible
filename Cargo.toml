@@ -1,0 +1,34 @@
+[package]
+name = "extensible"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+# I like this kind of fluff
+enum-as-inner = "0.6.1"
+
+# Those two crates seem very solid, I should probably keep using them
+rpds = "1.1.1"
+lasso = { version = "0.7.3", features = ['multi-threaded'] }
+
+# They say it is slow to insert? (But is it?) Maybe the `hashconsing` crate is
+# faster? (Note, this could be used for strings too but lasso is faster)
+#
+# Anyway, maybe I don't need to deduplicate terms, I just need some arena to
+# store them and have they deallocate when not used.. like a GC. Or even, use
+# `typed-generational-arena` for this, too (it's supposed to store weak
+# references, to deallocate after use)
+internment = "0.8.6"
+
+# The reasion this is needed right now is that `internment` can only store stuff
+# that implements `Hash`. So I add environments here, and pass around their
+# indices into the arena
+typed-generational-arena = "0.2.7"
+
+# about arenas and interning
+#
+# there is way too much dependencies that deal with interning and arenas. I need
+# to trim down a bit.
+#
+#
