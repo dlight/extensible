@@ -300,13 +300,19 @@ mod tests {
 
     static EMPTY_ENV: LazyLock<Env> = LazyLock::new(|| Env::empty());
 
+    macro_rules! eval_eq {
+        ($expr:expr, $expected:expr) => {{
+            let result = $expr.eval(*EMPTY_ENV).into_value();
+            assert_eq!(result, Ok($expected));
+        }};
+    }
+
     #[test]
     fn test_int_addition() {
         let a = Expr::int(2);
         let b = Expr::int(3);
-        let result = Add::expr(a, b).eval(*EMPTY_ENV).into_value();
 
-        assert_eq!(result, Ok(Value::Int(5)));
+        eval_eq!(Add::expr(a, b), Value::Int(5));
     }
 
     #[test]
@@ -326,11 +332,9 @@ mod tests {
         let a = Expr::bool(true);
         let b = Expr::bool(true);
         let c = Expr::bool(false);
-        let eq_true = Eq::expr(a, b).eval(*EMPTY_ENV).into_value();
-        let eq_false = Eq::expr(a, c).eval(*EMPTY_ENV).into_value();
 
-        assert_eq!(eq_true, Ok(Value::Bool(true)));
-        assert_eq!(eq_false, Ok(Value::Bool(false)));
+        eval_eq!(Eq::expr(a, b), Value::Bool(true));
+        eval_eq!(Eq::expr(a, c), Value::Bool(false));
     }
 
     #[test]
@@ -339,11 +343,9 @@ mod tests {
         let a = Expr::int(10);
         let b = Expr::int(10);
         let c = Expr::int(20);
-        let eq_true = Eq::expr(a, b).eval(*EMPTY_ENV).into_value();
-        let eq_false = Eq::expr(a, c).eval(*EMPTY_ENV).into_value();
 
-        assert_eq!(eq_true, Ok(Value::Bool(true)));
-        assert_eq!(eq_false, Ok(Value::Bool(false)));
+        eval_eq!(Eq::expr(a, b), Value::Bool(true));
+        eval_eq!(Eq::expr(a, c), Value::Bool(false));
     }
 
     #[test]
@@ -357,32 +359,14 @@ mod tests {
     }
 
     #[test]
-    fn test_if_then_else_true_branch() {
-        let cond = Expr::bool(true);
-        let then_branch = Expr::int(42);
-        let else_branch = Expr::int(7);
-        let expr = If::expr(cond, then_branch, else_branch);
-        let result = expr.eval(*EMPTY_ENV).into_value();
-
-        assert_eq!(result, Ok(Value::Int(42)));
-    }
-
-    #[test]
-    fn test_if_then_else_false_branch() {
-        let cond_true = Expr::bool(true);
-        let cond_false = Expr::bool(false);
+    fn test_if_then_else() {
+        let istrue = Expr::bool(true);
+        let isfalse = Expr::bool(false);
         let then_branch = Expr::int(42);
         let else_branch = Expr::int(7);
 
-        let expr_true = If::expr(cond_true, then_branch, else_branch);
-        let expr_false = If::expr(cond_false, then_branch, else_branch);
-
-        let result_true = expr_true.eval(*EMPTY_ENV).into_value();
-        let result_false = expr_false.eval(*EMPTY_ENV).into_value();
-
-        assert_eq!(result_true, Ok(Value::Int(42)));
-
-        assert_eq!(result_false, Ok(Value::Int(7)));
+        eval_eq!(If::expr(istrue, then_branch, else_branch), Value::Int(42));
+        eval_eq!(If::expr(isfalse, then_branch, else_branch), Value::Int(7));
     }
 
     #[test]
@@ -391,12 +375,7 @@ mod tests {
         let body = Add::expr(Var::expr("x"), Expr::int(1));
         let lambda = Lambda::expr("x", body);
 
-        // apply to argument 41
-        let result = Call::expr(lambda, Expr::int(41))
-            .eval(*EMPTY_ENV)
-            .into_value();
-
-        assert_eq!(result, Ok(Value::Int(42)));
+        eval_eq!(Call::expr(lambda, Expr::int(41)), Value::Int(42));
     }
 
     #[test]
@@ -414,11 +393,7 @@ mod tests {
         let cond2 = Eq::expr(expr2, Expr::int(4)); // expr2 == 4
 
         // if cond1 then cond2 else false is the same as cond1 && cond2
-        let combined = If::expr(cond1, cond2, Expr::bool(false));
-
-        let result = combined.eval(env).into_value();
-
-        assert_eq!(result, Ok(Value::Bool(true)));
+        eval_eq!(If::expr(cond1, cond2, Expr::bool(false)), Value::Bool(true));
     }
 
     #[test]
@@ -436,21 +411,14 @@ mod tests {
 
         // evaluate f(r)
         // (no function composition, actually just calls f(15))
-        let result_1 = Call::expr(f, r).eval(*EMPTY_ENV).into_value();
-
-        match result_1 {
-            Ok(Value::Int(16)) => {}
-            e => panic!("Expected Int(16), got {:?}", e),
-        }
+        eval_eq!(Call::expr(f, r), Value::Int(16));
 
         // h(x) = f(g(x))
         let h_body = Call::expr(f, Call::expr(g, Var::expr("x")));
         let h = Lambda::expr("x", h_body);
 
         // evaluate h(5)
-        let result_2 = Call::expr(h, Expr::int(5)).eval(*EMPTY_ENV).into_value();
-
-        assert_eq!(result_2, Ok(Value::Int(16)));
+        eval_eq!(Call::expr(h, Expr::int(5)), Value::Int(16));
     }
 
     #[test]
@@ -506,17 +474,9 @@ mod tests {
         );
 
         // call triangular(3) which should be 1 + 2 + 3
-        let result = Call::expr(triangular_func, Expr::int(3))
-            .eval(*EMPTY_ENV)
-            .into_value();
-
-        assert_eq!(result, Ok(Value::Int(6)));
+        eval_eq!(Call::expr(triangular_func, Expr::int(3)), Value::Int(6));
 
         // call triangular(53) which should be 1 + 2 + 3 + ... + 53
-        let result = Call::expr(triangular_func, Expr::int(53))
-            .eval(*EMPTY_ENV)
-            .into_value();
-
-        assert_eq!(result, Ok(Value::Int(1431)));
+        eval_eq!(Call::expr(triangular_func, Expr::int(53)), Value::Int(1431));
     }
 }

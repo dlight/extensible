@@ -8,7 +8,7 @@
   `pub(crate)` things.
 
 * [ ] Add some syntax sugar to make tests smaller
-  * [ ] A macro for calling the function, then testing if it equals some value
+  * [x] A macro for calling the function, then testing if it equals some value
   * [ ] Stuff like `add(var(x), int(1))` rather than
         `Add::expr(Var::expr(x), Value::int(1))`
 
