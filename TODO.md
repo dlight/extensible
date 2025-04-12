@@ -7,9 +7,9 @@
 * [ ] Comment things. At least the "public" API of each module, as in, the
   `pub(crate)` things.
 
-* [ ] Add some syntax sugar to make tests smaller
+* [x] Add some syntax sugar to make tests smaller
   * [x] A macro for calling the function, then testing if it equals some value
-  * [ ] Stuff like `add(var(x), int(1))` rather than
+  * [x] Stuff like `add(var(x), int(1))` rather than
         `Add::expr(Var::expr(x), Value::int(1))`
 
 ## Change code structure in more involved ways

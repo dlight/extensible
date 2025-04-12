@@ -307,18 +307,50 @@ mod tests {
         }};
     }
 
+    fn int(i: i32) -> Expr {
+        Value::int(i)
+    }
+
+    fn bool(b: bool) -> Expr {
+        Value::bool(b)
+    }
+
+    fn add(left: Expr, right: Expr) -> Expr {
+        Add::expr(left, right)
+    }
+
+    fn eq(left: Expr, right: Expr) -> Expr {
+        Eq::expr(left, right)
+    }
+
+    fn if_(cond: Expr, then_branch: Expr, else_branch: Expr) -> Expr {
+        If::expr(cond, then_branch, else_branch)
+    }
+
+    fn call(func: Expr, arg: Expr) -> Expr {
+        Call::expr(func, arg)
+    }
+
+    fn lambda(param: &str, body: Expr) -> Expr {
+        Lambda::expr(param, body)
+    }
+
+    fn var(name: &str) -> Expr {
+        Var::expr(name)
+    }
+
     #[test]
     fn test_int_addition() {
-        let a = Value::int(2);
-        let b = Value::int(3);
+        let a = int(2);
+        let b = int(3);
 
-        eval_eq!(Add::expr(a, b), Value::Int(5));
+        eval_eq!(add(a, b), Value::Int(5));
     }
 
     #[test]
     fn test_int_addition_panic() {
-        let a = Value::int(2);
-        let b = Value::bool(true);
+        let a = int(2);
+        let b = bool(true);
 
         let result = std::panic::catch_unwind(|| {
             a.add(b, *EMPTY_ENV);
@@ -329,53 +361,53 @@ mod tests {
 
     #[test]
     fn test_bool_equality() {
-        let a = Value::bool(true);
-        let b = Value::bool(true);
-        let c = Value::bool(false);
+        let a = bool(true);
+        let b = bool(true);
+        let c = bool(false);
 
-        eval_eq!(Eq::expr(a, b), Value::Bool(true));
-        eval_eq!(Eq::expr(a, c), Value::Bool(false));
+        eval_eq!(eq(a, b), Value::Bool(true));
+        eval_eq!(eq(a, c), Value::Bool(false));
     }
 
     #[test]
     fn test_int_equality() {
         let env = Env::empty();
-        let a = Value::int(10);
-        let b = Value::int(10);
-        let c = Value::int(20);
+        let a = int(10);
+        let b = int(10);
+        let c = int(20);
 
-        eval_eq!(Eq::expr(a, b), Value::Bool(true));
-        eval_eq!(Eq::expr(a, c), Value::Bool(false));
+        eval_eq!(eq(a, b), Value::Bool(true));
+        eval_eq!(eq(a, c), Value::Bool(false));
     }
 
     #[test]
     fn test_eq_panic_mixed_types() {
-        let a = Value::int(1);
-        let b = Value::bool(true);
+        let a = int(1);
+        let b = bool(true);
         let result = std::panic::catch_unwind(|| {
-            Eq::expr(a, b).eval(*EMPTY_ENV);
+            eq(a, b).eval(*EMPTY_ENV);
         });
         assert!(result.is_err());
     }
 
     #[test]
     fn test_if_then_else() {
-        let istrue = Value::bool(true);
-        let isfalse = Value::bool(false);
-        let then_branch = Value::int(42);
-        let else_branch = Value::int(7);
+        let istrue = bool(true);
+        let isfalse = bool(false);
+        let then_branch = int(42);
+        let else_branch = int(7);
 
-        eval_eq!(If::expr(istrue, then_branch, else_branch), Value::Int(42));
-        eval_eq!(If::expr(isfalse, then_branch, else_branch), Value::Int(7));
+        eval_eq!(if_(istrue, then_branch, else_branch), Value::Int(42));
+        eval_eq!(if_(isfalse, then_branch, else_branch), Value::Int(7));
     }
 
     #[test]
     fn test_lambda_and_application() {
         // λx. x + 1
-        let body = Add::expr(Var::expr("x"), Value::int(1));
-        let lambda = Lambda::expr("x", body);
+        let body = add(Var::expr("x"), int(1));
+        let lambda = lambda("x", body);
 
-        eval_eq!(Call::expr(lambda, Value::int(41)), Value::Int(42));
+        eval_eq!(call(lambda, int(41)), Value::Int(42));
     }
 
     #[test]
@@ -386,63 +418,57 @@ mod tests {
         //
         // (language doesn't have conjunction yet)
 
-        let expr1 = Add::expr(Value::int(5), Value::int(3)); // 5 + 3
-        let cond1 = Eq::expr(expr1, Value::int(8)); // expr1 == 8
+        let expr1 = add(int(5), int(3)); // 5 + 3
+        let cond1 = eq(expr1, int(8)); // expr1 == 8
 
-        let expr2 = Add::expr(Value::int(2), Value::int(2)); // 2 + 2
-        let cond2 = Eq::expr(expr2, Value::int(4)); // expr2 == 4
+        let expr2 = add(int(2), int(2)); // 2 + 2
+        let cond2 = eq(expr2, int(4)); // expr2 == 4
 
         // if cond1 then cond2 else false is the same as cond1 && cond2
-        eval_eq!(
-            If::expr(cond1, cond2, Value::bool(false)),
-            Value::Bool(true)
-        );
+        eval_eq!(if_(cond1, cond2, bool(false)), Value::Bool(true));
     }
-
     #[test]
     fn test_function_composition() {
         // f(x) = x + 1
-        let f_body = Add::expr(Var::expr("x"), Value::int(1));
-        let f = Lambda::expr("x", f_body);
+        let f_body = add(var("x"), int(1));
+        let f = lambda("x", f_body);
 
         // g(x) = x + 10
-        let g_body = Add::expr(Var::expr("x"), Value::int(10));
-        let g = Lambda::expr("x", g_body);
+        let g_body = add(var("x"), int(10));
+        let g = lambda("x", g_body);
 
         // r = g(5), then evaluate r
-        let r = Call::expr(g, Value::int(5)).eval(*EMPTY_ENV);
+        let r = call(g, int(5)).eval(*EMPTY_ENV);
 
         // evaluate f(r)
         // (no function composition, actually just calls f(15))
-        eval_eq!(Call::expr(f, r), Value::Int(16));
+        eval_eq!(call(f, r), Value::Int(16));
 
         // h(x) = f(g(x))
-        let h_body = Call::expr(f, Call::expr(g, Var::expr("x")));
-        let h = Lambda::expr("x", h_body);
+        let h_body = call(f, call(g, var("x")));
+        let h = lambda("x", h_body);
 
         // evaluate h(5)
-        eval_eq!(Call::expr(h, Value::int(5)), Value::Int(16));
+        eval_eq!(call(h, int(5)), Value::Int(16));
     }
 
     #[test]
     fn test_nested_lambdas() {
         // outer_func = λx. λy. x + y
-        let inner_body = Add::expr(Var::expr("x"), Var::expr("y"));
-        let func = Lambda::expr("y", inner_body);
-        let outer_func = Lambda::expr("x", func);
+        let inner_body = add(var("x"), var("y"));
+        let func = lambda("y", inner_body);
+        let outer_func = lambda("x", func);
 
         // Apply it to 10
-        let applied_once = Call::expr(outer_func, Value::int(10)).eval(*EMPTY_ENV);
+        let applied_once = call(outer_func, int(10)).eval(*EMPTY_ENV);
 
         // Further apply the result to 5
-        let result = Call::expr(applied_once, Value::int(5))
-            .eval(*EMPTY_ENV)
-            .into_value();
+        let result = call(applied_once, int(5)).eval(*EMPTY_ENV).into_value();
 
         assert_eq!(result, Ok(Value::Int(15)));
 
         // Call outer_func(20)(6) in a single expresssion
-        let all_at_once = Call::expr(Call::expr(outer_func, Value::int(20)), Value::int(6))
+        let all_at_once = call(call(outer_func, int(20)), int(6))
             .eval(*EMPTY_ENV)
             .into_value();
 
@@ -451,38 +477,29 @@ mod tests {
 
     #[test]
     fn test_triangular_with_z_combinator() {
-        // Helper to create variable with a given name
-        let var = |name: &str| Var::expr(name);
-
         // Z combinator: λf. (λx. f (λv. (x x) v)) (λx. f (λv. (x x) v))
-        let inner_app = |x: Expr| Call::expr(x, x);
-        let inner_lambda = Lambda::expr("v", Call::expr(inner_app(var("x")), var("v")));
-        let outer_lambda = Lambda::expr("x", Call::expr(var("f"), inner_lambda));
-        let z_combinator = Lambda::expr("f", Call::expr(outer_lambda, outer_lambda));
+        let inner_app = |x: Expr| call(x, x);
+        let inner_lambda = lambda("v", call(inner_app(var("x")), var("v")));
+        let outer_lambda = lambda("x", call(var("f"), inner_lambda));
+        let z_combinator = lambda("f", call(outer_lambda, outer_lambda));
 
         // Define triangular function:
         // tri = λtri_rec. λn. if n == 0 then 0 else n + tri_rec(n - 1)
-        let condition = Eq::expr(var("n"), Value::int(0));
-        let n_minus_one = Add::expr(var("n"), Value::int(-1));
-        let recursive_call = Call::expr(var("tri_rec"), n_minus_one);
-        let sum = Add::expr(var("n"), recursive_call);
+        let condition = eq(var("n"), int(0));
+        let n_minus_one = add(var("n"), int(-1));
+        let recursive_call = call(var("tri_rec"), n_minus_one);
+        let sum = add(var("n"), recursive_call);
 
-        let inner_lambda = Lambda::expr("n", If::expr(condition, Value::int(0), sum));
-        let triangular = Lambda::expr("tri_rec", inner_lambda);
+        let inner_lambda = lambda("n", if_(condition, int(0), sum));
+        let triangular = lambda("tri_rec", inner_lambda);
 
         // Create triangular function via applying z_combinator
-        let triangular_func = Call::expr(
-            z_combinator,
-            Lambda::expr("f", Call::expr(triangular, var("f"))),
-        );
+        let triangular_func = call(z_combinator, lambda("f", call(triangular, var("f"))));
 
         // call triangular(3) which should be 1 + 2 + 3
-        eval_eq!(Call::expr(triangular_func, Value::int(3)), Value::Int(6));
+        eval_eq!(call(triangular_func, int(3)), Value::Int(6));
 
         // call triangular(53) which should be 1 + 2 + 3 + ... + 53
-        eval_eq!(
-            Call::expr(triangular_func, Value::int(53)),
-            Value::Int(1431)
-        );
+        eval_eq!(call(triangular_func, int(53)), Value::Int(1431));
     }
 }
