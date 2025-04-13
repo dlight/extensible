@@ -2,7 +2,7 @@
 
 Currently this is a toy interpreter for lambda calculus with integers and
 booleans, and just three operations (addition, equality and if-then-else).
-Variables are supposed to be lexically scoped.
+Variables are supposed to be lexically scoped, and evaluation order is strict.
 
 # How to run it
 

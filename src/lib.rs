@@ -477,6 +477,9 @@ mod tests {
 
     #[test]
     fn test_triangular_with_z_combinator() {
+        // We use the z combinator here rather than the more common y combinator because the
+        // language is currently strict (not lazy)
+
         // Z combinator: λf. (λx. f (λv. (x x) v)) (λx. f (λv. (x x) v))
         let inner_app = |x: Expr| call(x, x);
         let inner_lambda = lambda("v", call(inner_app(var("x")), var("v")));
