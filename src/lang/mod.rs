@@ -15,14 +15,14 @@ mod tests;
 
 type EnvMap = HashTrieMapSync<Var, Expr>;
 
-type Var = Spur;
+pub type Var = Spur;
 type Env = StandardIndex<EnvMap>;
 
 static RODEO: LazyLock<ThreadedRodeo> = LazyLock::new(|| ThreadedRodeo::new());
 static ENV_ARENA: LazyLock<Mutex<StandardArena<EnvMap>>> =
     LazyLock::new(|| Mutex::new(StandardArena::new()));
 
-trait VarExt {
+pub trait VarExt {
     fn new(name: &str) -> Self;
     fn expr(name: &str) -> Expr;
     fn str(self) -> &'static str;
@@ -110,10 +110,10 @@ impl HasEnv for Expr {
     type Env = Env;
 }
 
-type Expr = Intern<ExprNode>;
+pub type Expr = Intern<ExprNode>;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, EnumAsInner)]
-enum ExprNode {
+pub enum ExprNode {
     Var(Var),
     Value(Value),
     Add(Add),
@@ -124,54 +124,54 @@ enum ExprNode {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-enum Value {
+pub enum Value {
     Int(i32),
     Bool(bool),
 }
 
 impl Value {
-    fn int(i: i32) -> Expr {
+    pub fn int(i: i32) -> Expr {
         Intern::new(ExprNode::Value(Value::Int(i)))
     }
 
-    fn bool(b: bool) -> Expr {
+    pub fn bool(b: bool) -> Expr {
         Intern::new(ExprNode::Value(Value::Bool(b)))
     }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-struct Add {
+pub struct Add {
     left: Expr,
     right: Expr,
 }
 
 impl Add {
-    fn expr(left: Expr, right: Expr) -> Expr {
+    pub fn expr(left: Expr, right: Expr) -> Expr {
         Intern::new(ExprNode::Add(Add { left, right }))
     }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-struct Eq {
+pub struct Eq {
     left: Expr,
     right: Expr,
 }
 
 impl Eq {
-    fn expr(left: Expr, right: Expr) -> Expr {
+    pub fn expr(left: Expr, right: Expr) -> Expr {
         Intern::new(ExprNode::Eq(Eq { left, right }))
     }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-struct If {
+pub struct If {
     cond: Expr,
     then_branch: Expr,
     else_branch: Expr,
 }
 
 impl If {
-    fn expr(cond: Expr, then_branch: Expr, else_branch: Expr) -> Expr {
+    pub fn expr(cond: Expr, then_branch: Expr, else_branch: Expr) -> Expr {
         Intern::new(ExprNode::If(If {
             cond,
             then_branch,
@@ -181,25 +181,25 @@ impl If {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-struct Call {
+pub struct Call {
     func: Expr,
     arg: Expr,
 }
 
 impl Call {
-    fn expr(func: Expr, arg: Expr) -> Expr {
+    pub fn expr(func: Expr, arg: Expr) -> Expr {
         Intern::new(ExprNode::Call(Call { func, arg }))
     }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-struct Lambda {
+pub struct Lambda {
     param: Var,
     body: Expr,
 }
 
 impl Lambda {
-    fn expr(param: &str, body: Expr) -> Expr {
+    pub fn expr(param: &str, body: Expr) -> Expr {
         Intern::new(ExprNode::Closure(
             Lambda {
                 param: RODEO.get_or_intern(param),

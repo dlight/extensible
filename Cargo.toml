@@ -7,6 +7,12 @@ license = "MIT"
 [dependencies]
 # I like this kind of fluff
 enum-as-inner = "0.6.1"
+itertools = "0.14.0"
+
+# Pretty high quality parsing stack
+chumsky = "1.0.0-alpha.8"
+ariadne = "0.5.1"
+logos = "0.15.0"
 
 # Those two crates seem very solid, I should probably keep using them
 rpds = "1.1.1"
@@ -30,5 +36,3 @@ typed-generational-arena = "0.2.7"
 #
 # there is way too much dependencies that deal with interning and arenas. I need
 # to trim down a bit.
-#
-#

@@ -1,42 +1,11 @@
 use super::*;
+use crate::util::*;
 
 macro_rules! eval_eq {
     ($expr:expr, $expected:expr) => {{
         let result = $expr.eval(Env::empty()).into_value();
         assert_eq!(result, Ok($expected));
     }};
-}
-
-fn int(i: i32) -> Expr {
-    Value::int(i)
-}
-
-fn bool(b: bool) -> Expr {
-    Value::bool(b)
-}
-
-fn add(left: Expr, right: Expr) -> Expr {
-    Add::expr(left, right)
-}
-
-fn eq(left: Expr, right: Expr) -> Expr {
-    Eq::expr(left, right)
-}
-
-fn if_(cond: Expr, then_branch: Expr, else_branch: Expr) -> Expr {
-    If::expr(cond, then_branch, else_branch)
-}
-
-fn call(func: Expr, arg: Expr) -> Expr {
-    Call::expr(func, arg)
-}
-
-fn lambda(param: &str, body: Expr) -> Expr {
-    Lambda::expr(param, body)
-}
-
-fn var(name: &str) -> Expr {
-    Var::expr(name)
 }
 
 #[test]
