@@ -6,7 +6,8 @@ Variables are supposed to be lexically scoped, and evaluation order is strict.
 
 # How to run it
 
-It actually doesn't run run, like, it's not a program yet. But you can run the tests:
+It actually doesn't run run, like, it's not a program yet. But you can run the
+tests:
 
 ```sh
 cargo test
@@ -25,12 +26,13 @@ architecture in order to make all expressions implement `Copy`, simplifying
 ownership (or rather, sidestepping it). The idea is actually pretty cool - I am
 calling it *Sharing to Copy* - I just wanted to focus on the lambda calculus
 rather than make the code too noisy. But I used too many dependencies for it and
-I would like to cut down a bit. See [`architecture.md`](./architecture.md) for
-details.
+I would like to cut down a bit. See
+[`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md) for details.
 
 # What about the name?
 
-It comes from [Having an Effect](https://okmij.org/ftp/Computation/having-effect.html)
+It comes from [Having an
+Effect](https://okmij.org/ftp/Computation/having-effect.html)
 
 > This research has been a journey following the tantalizing lead: the founding
 > papers on monads, monad transformers, free monads and extensible-effects were

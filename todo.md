@@ -1,4 +1,6 @@
-# TODO (I won't probably follow it but for a small personal project it's nice to have)
+# TODO
+
+(I won't probably follow most of it it but for a small personal project it's nice to have)
 
 ## Tidy up
 
@@ -15,11 +17,13 @@
 ## Change code structure in more involved ways
 
 * [ ] Have multiple instances of `internment`, one for each type, rather than a
-      big one for `Expr`. This would enable not interning `Value`, which is dumb.
+      big one for `Expr`. This would enable not interning `Value`, which is
+      dumb.
   * [ ] Indeed it's also dumb to intern the environments. See
-    [`architecture.md`](./architecture.md) on a plan to improve on this.
+    [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md) on a plan to
+    improve on this.
     * [ ] Or better yet, drop the interning for AST nodes and store everything
-      on arenas. See [`architecture.md`](./architecture.md).
+      on arenas. See [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md).
 * [ ] Rather than having `Expr` implement each trait, have some `Interpreter`
       struct implement it, and add `Expr` as an associated type.
 
