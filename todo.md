@@ -16,19 +16,6 @@
   * [x] Stuff like `add(var(x), int(1))` rather than
         `Add::expr(Var::expr(x), Value::int(1))`
 
-## Change code structure in more involved ways
-
-* [ ] Have multiple instances of `internment`, one for each type, rather than a
-      big one for `Expr`. This would enable not interning `Value`, which is
-      dumb.
-  * [ ] Indeed it's also dumb to intern the environments. See
-        [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md) on a plan to
-        improve on this.
-    * [ ] Or better yet, drop the interning for AST nodes and store everything
-          on arenas. See [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md).
-* [ ] Rather than having `Expr` implement each trait, have some `Interpreter`
-      struct implement it, and add `Expr` as an associated type.
-
 ## Other side quests
 
 * [ ] Make a small CLI symbolic calculator with line editing
@@ -73,9 +60,28 @@
         expresssion or an effect
 * [ ] Do the thing
 
+## Change code structure in more involved ways
+
+* [ ] Have multiple instances of `internment`, one for each type, rather than a
+      big one for `Expr`. This would enable not interning `Value`, which is
+      dumb.
+  * [ ] Indeed it's also dumb to intern the environments. See
+        [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md) on a plan to
+        improve on this.
+    * [ ] Or better yet, drop the interning for AST nodes and store everything
+          on arenas. See [`notes/sharing-to-copy.md`](./notes/sharing-to-copy.md).
+* [ ] Rather than having `Expr` implement each trait, have some `Interpreter`
+      struct implement it, and add `Expr` as an associated type.
+
 ## Probably won't do it
 
 * [ ] Add a GC to be able to actually free memory (right now I think some memory
       is freed, but I am not sure)
 * [ ] Make it run in multiple threads (right now things are actually `Sync` and
-  so on)
+      so on)
+
+
+* [ ] Rewrite the AST using the [recursion
+      schemes](https://www.tweag.io/blog/2025-04-10-rust-recursion-schemes/)
+      pattern ([/r/rust
+      discussion](https://old.reddit.com/r/rust/comments/1k1gfyi/practical_recursion_schemes_in_rust_traversing/))

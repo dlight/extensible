@@ -68,3 +68,16 @@ references, to deallocate after use)
 
 That way I don't need to implement `Hash` on arenas so the above improvement is
 moot.
+
+### A silver lining
+
+Well perhaps deduplicating nodes isn't very much needed, but the idea of having
+a node being an index into an arena is used by the zig compiler (I saw it [on
+this
+discussion](https://old.reddit.com/r/rust/comments/1k1gfyi/practical_recursion_schemes_in_rust_traversing/mnqfuoq/?context=3)).
+It also has the idea that if the node is small enough, it doesn't really need to
+be allocated in an arena (which is like the idea that `Value` shouldn't be
+inside `internment`).
+
+However someone says below that it forces you to allocate structures in a depth
+first manner, which may not be ideal for cache locality when accessing later.
